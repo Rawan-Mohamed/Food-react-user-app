@@ -5,6 +5,8 @@ import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import { useContext } from 'react';
+import { AuthContext } from '../../../Context/AuthContext';
 
 
 export default function ResetPass() {
@@ -16,12 +18,12 @@ export default function ResetPass() {
     getValues,
 
   } = useForm();
-
+  const {baseUrl} = useContext(AuthContext)
 
   const onSubmit = (data) => {
     // console.log(data);
     axios
-      .post("https://upskilling-egypt.com:443/api/v1/Users/Reset", data)
+      .post(`${baseUrl}/Users/Reset`, data)
       .then((response) => {
         navigate("/login");
         toast.success("Password changed successfully", {

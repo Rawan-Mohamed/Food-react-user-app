@@ -1,20 +1,20 @@
 import React, { useEffect, useState } from 'react'
-import Header from '../../../SharedModule/Components/Header/Header'
 import { Link } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import CategoriesList from '../../../CategoriesModule/Components/CategoriesList/CategoriesList';
 import HeaderHome from '../../../SharedModule/Components/Header/HeaderHome';
+import { useContext } from 'react';
+import { AuthContext } from '../../../Context/AuthContext';
 
 
 
 export default function Home() {
   {/* ------------------------------------------ */ }
-
+const {userData} =useContext(AuthContext)
   {/* ------------------------------------------ */ }
   return (
     <>
       <HeaderHome
-        title={'Welcom UpSkilling'}
+        title={"Welcome "+userData?.userName || "user"}
+        // {'Welcom UpSkilling'}
         paragraph={'This is a welcoming screen for the entry of the application , you can now see the options'}
       
       />

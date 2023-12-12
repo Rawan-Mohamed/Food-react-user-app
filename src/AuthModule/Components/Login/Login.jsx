@@ -5,8 +5,10 @@ import axios from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useContext } from 'react';
+import { AuthContext } from '../../../Context/AuthContext';
 
-export default function Login({ saveAdminData }) {
+export default function Login({ saveUserData }) {
   const navigate = useNavigate();
   // some {properties} and receive return from hook useForm 
   const {
@@ -14,17 +16,17 @@ export default function Login({ saveAdminData }) {
     handleSubmit,
     formState: { errors },
   } = useForm();
-
+  const { baseUrl } = useContext(AuthContext);
   // bdal mn handlha gwa el handleSubmit h3ml function a st2bl feha 
   const onSubmit = (data) => {
     console.log(data);
     axios
-      .post("https://upskilling-egypt.com:443/api/v1/Users/Login", data)
+      .post(`${baseUrl}/Users/Login`, data)
       .then((response) => {
         console.log(response);
 
-        localStorage.setItem("adminToken", response.data.token); //m3ia el 7aga el tsbt any logged in 
-        saveAdminData();
+        localStorage.setItem("userToken", response.data.token); //m3ia el 7aga el tsbt any logged in 
+        saveUserData();
         navigate("/dashboard")
       })
       .catch((error) => {
@@ -51,7 +53,7 @@ export default function Login({ saveAdminData }) {
               <p>Welcome Back! Please enter your details</p>
               {/* /Email/ */}
               <div className="form-group my-3 input-icons position-relative">
-                <i className="icons fa-solid fa-envelope position-absolute text-success  "/>
+                <i className="icons fa-solid fa-envelope position-absolute text-success  " />
 
                 <input
                   placeholder='Enter your E-mail'
@@ -73,7 +75,7 @@ export default function Login({ saveAdminData }) {
               {/* //Password */}
               <div className="form-group my-3 input-icons position-relative">
                 <i className="icons fa-solid fa-lock position-absolute text-success " />
-{/* <i className="fa-solid fa-eye" /> */}
+                {/* <i className="fa-solid fa-eye" /> */}
                 <input
                   placeholder='Password'
                   className='form-control'
@@ -88,17 +90,23 @@ export default function Login({ saveAdminData }) {
                   <span className='text-danger'>{errors.password.message}</span>)}
               </div>
 
-              <div >
+              <div className='d-flex form-group my-3 justify-content-between'>
                 {/* Register password */}
+                <Link to="/registeration" className=' text-success'>
+                    Register now?
+                  </Link>
                 {/* <div className='register col-md-6'>
                   <a href="#" className="text-black">Register now</a>
                 </div> */}
                 {/* Forget password */}
-                <div className='form-group forgetpass text-end '>
+                <Link to="/reset-pass-request" className=' text-success'>
+                    Forget Password?
+                  </Link>
+                {/* <div className='form-group col-md-6 forgetpass text-end '>
                   <Link to="/reset-pass-request" className=' text-success'>
                     Forget Password?
                   </Link>
-                </div>
+                </div> */}
               </div>
 
               {/* Buttuon login */}

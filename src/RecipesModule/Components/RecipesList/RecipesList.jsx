@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Header from '../../../SharedModule/Components/Header/Header'
 import axios from 'axios';
 import NoData from '../../../SharedModule/Components/NoData/NoData';
@@ -7,125 +7,45 @@ import { useForm } from 'react-hook-form';
 import noData from "../../../assets/images/no-data.png"
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { AuthContext } from '../../../Context/AuthContext';
+import { ToastContext } from '../../../Context/ToastContext';
 
 
 
 export default function RecipesList() {
-  const {
-    register,
-    handleSubmit,
-    setValue,
-    formState: { errors },
-    reset,
-  } = useForm();
-
-  const [recipesList, setRecipesList] = useState([]);
+  const [recipesList, setRecipesList] = useState({});
   const [modelState, setModelState] = useState("close")
   const [itemId, setItemId] = useState(0);
   const [tagsList, setTagsList] = useState([]);
   const [categoriesList, setCategoriesList] = useState([]);
   const [recipe, setRecipe] = useState();
   const [pagesArray, setPagesArray] = useState([])
+  const [visiblePages, setVisiblePages] = useState([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [searchString, setSearchString] = useState("");
   const [selectedTagId, setSelectedTagId] = useState("");
   const [selectedCateId, setSelectedCateId] = useState("");
-
-
-  const showAddModel = () => {
-
-    setValue("name", null);
-    setModelState("Add-model")
-  }
-
-
-  const showDeletModel = (id) => {
-    setItemId(id);
-    setModelState("delete-model")
-  }
+  const { requestHeaders, baseUrl } = useContext(AuthContext)
+  const { getToastValue } = useContext(ToastContext)
+  const [recipeDetails, setRecipeDetails] = useState({});
 
   const handleClose = () => setModelState("close");
 
 
-  // Add recipe API
-  const onSubmit = (data) => {
-    // -------------------
-    // try way 
-    // const formData = new FormData();
 
-    // for (const key in data) {
-    //   if (data.hasOwnProperty(key)) {
-    //     const value = data[key];
-    //     if (Array.isArray(value)) {
-    //       for (let i = 0; i < value.length; i++) {
-    //         formData.append(`${key}[${i}]`, value[i]);
-    //       }
-    //     } else {
-    //       formData.append(key, value);
-    //     }
-    //   }
-    // }
+  const showViewModel = (id) => {
+    setItemId(id);
+    setModelState("view-model")
+    getRecipesDetails(id)
+  }
 
 
-    // ---------------------------
-    const addFormData = new FormData();
-    addFormData.append("name", data['name']);
-    addFormData.append("price", data['price']);
-    addFormData.append("description", data['description']);
-    addFormData.append("tagId", data['tagId']);
-    addFormData.append("categoriesIds", data['categoriesIds']);
-    addFormData.append("recipeImage", data['recipeImage'][0]);
-    // Object.entries(data).forEach(([key, value]) => {
-    //   if (Array.isArray(value)) {
-    //     value.forEach((item, index) => {
-    //       formData.append(`${key}[${index}]`, item);
-    //     });
-    //   } else {
-    //     formData.append(key, value);
-    //   }
-    // })
-    console.log(data);
-    axios.post("https://upskilling-egypt.com:443/api/v1/Recipe/", addFormData
-      // { 
-      //   ...addFormData,
-      //    recipeImage: addFormData.recipeImage[0] 
-      //   },
-
-      , {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-          "Content-Type": "multipart/form-data"
-        }
-      })
-      .then((response) => {
-        console.log(response)
-        toast.success("Add successfully", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-        })
-        handleClose();
-        getAllRecipes();
-
-
-      })
-      .catch((error) => {
-        console.log(error)
-      })
-
-    reset();
-  };
 
   //Get Recipe API
   const getAllRecipes = (pageNo, name, tagId, categoryId) => {
-    axios.get("https://upskilling-egypt.com:443/api/v1/Recipe/", {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-      },
+    axios.get(`${baseUrl}/Recipe/`, {
+      headers: requestHeaders,
       params: {
         pageSize: 5,
         pageNumber: pageNo,
@@ -137,7 +57,8 @@ export default function RecipesList() {
 
     })
       .then((response) => {
-        setPagesArray(Array(response.data.totalNumberOfPages).fill().map((_, i) => i + 1));
+        // setPagesArray(Array(response.data.totalNumberOfPages).fill().map((_, i) => i + 1));
+        setTotalPages(response.data.totalNumberOfPages)
         setRecipesList(response?.data?.data);
 
       })
@@ -146,116 +67,31 @@ export default function RecipesList() {
       })
   }
 
-  //Delete Recipe API
-  const deleteRecipes = () => {
-    axios.delete(`https://upskilling-egypt.com:443/api/v1/Recipe/${itemId}`, {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-      },
-    })
-
-      .then((response) => {
-        toast.success("delete successfully", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-        })
-        handleClose();
-        getAllRecipes(response.data.data);
-
-      })
-      .catch((error) => {
-        console.log(error);
-      })
-  }
-
-  //Update Recipe API
-  const updateRecipe = (data) => {
-
-      // -------------------
-    // try way 
-    // const formData = new FormData();
-
-    // for (let key in data) {
-    //   if (data.hasOwnProperty(key)) {
-    //     const value = data[key];
-
-    //     if (key === 'recipImage') {
-    //       if (value && value.length > 0) {
-    //         value = value[0];
-    //       } else {
-    //         // handle case when no file is selected
-    //         console.log('No file selected for the recipient image.');
-    //       }
-    //     }
-
-    //     formData.append(key, value[0]);
-    //   }
-    // }
-
-
-    // ---------------------------
-
-    const addFormData = new FormData();
-    addFormData.append("name", data['name']);
-    addFormData.append("price", data['price']);
-    addFormData.append("description", data['description']);
-    addFormData.append("tagId", data['tagId']);
-    addFormData.append("categoriesIds", data['categoriesIds']);
-    addFormData.append("recipeImage", data['recipeImage'][0]);
+  //View Recipe API
+  const getRecipesDetails = (id) => {
     axios
-      .put(`https://upskilling-egypt.com:443/api/v1/Recipe/${itemId}`, addFormData, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-        },
+      .get(`${baseUrl}/Recipe/${id}`, {
+        headers: requestHeaders,
       })
 
       .then((response) => {
-        toast.success("Update successfully", {
-          position: "top-right",
-          autoClose: 3000,
-          hideProgressBar: false,
-          closeOnClick: true,
-          pauseOnHover: true,
-          draggable: true,
-          progress: undefined,
-          theme: "colored",
-        })
-        getAllRecipes();
-        handleClose();
+        // getToastValue("success","deleted Successfuly")
+        // handleClose();
+        console.log(response.data);
+        setRecipeDetails(response.data);
+
       })
       .catch((error) => {
         console.log(error);
       })
   }
 
-  const showUpdateModel = (item) => {
-    setRecipe(item);
-    getAllTags();
-    getCategoryList();
-    setRecipe(item);
-    setValue("name", item.name);
-    setValue("price", item.price);
-    setValue("description", item.description);
-    setValue("tagId", item.tag.id);
-    setValue("categoriesIds", item.category[0].id);
-    // setValue("recipeImage", item.imagePath[0]);
-    setItemId(item.id);
-    setModelState("update-model")
-  }
 
   //Get Tag API
   const getAllTags = () => {
     // Fetch tags from the API
-    axios.get('https://upskilling-egypt.com:443/api/v1/tag/', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-      },
+    axios.get(`${baseUrl}/tag/`, {
+      headers: requestHeaders,
     })
       .then(response => {
         setTagsList(response?.data);
@@ -268,10 +104,8 @@ export default function RecipesList() {
   //Get Category List
   const getCategoryList = () => {
     // Fetch category from the API
-    axios.get('https://upskilling-egypt.com:443/api/v1/Category/', {
-      headers: {
-        Authorization: `Bearer ${localStorage.getItem("adminToken")}`,
-      },
+    axios.get(`${baseUrl}/Category/`, {
+      headers: requestHeaders,
     })
       .then(response => {
         setCategoriesList(response?.data?.data);
@@ -280,6 +114,24 @@ export default function RecipesList() {
         console.error('Error fetching catgories:', error);
       });
   }
+
+  const addToFavorit = () => {
+    axios.post(`${baseUrl}/userRecipe/`,
+      {
+        recipeId: itemId,
+      },
+      {
+        headers: requestHeaders
+      })
+      .then(response => {
+        getToastValue("success", "Added Successfuly")
+        handleClose();
+        console.log(response)
+      })
+      .catch((error) =>
+        console.log(error));
+  }
+
 
   // useEffect(() => {
   //   getCategoryList();
@@ -303,13 +155,38 @@ export default function RecipesList() {
     getAllRecipes(1, null, selectedTagId, select.target.value);
   };
 
+  const updateVisiblePages = () => {
+    const rangeSize = 5; // Adjust the number of visible pages as needed
+    const startPage = Math.max(1, currentPage - Math.floor(rangeSize / 2));
+    const endPage = Math.min(totalPages, startPage + rangeSize - 1);
+    setVisiblePages(Array.from({ length: endPage - startPage + 1 }, (_, i) => startPage + i));
+  };
+
   useEffect(() => {
     getCategoryList();
     getAllTags();
-    getAllRecipes(1);
-  }, []);
+    getAllRecipes(currentPage);
+  }, [currentPage]);
 
+  useEffect(() => {
+    updateVisiblePages();
+  }, [currentPage, totalPages]);
 
+  const handlePageChange = (newPage) => {
+    setCurrentPage(newPage);
+  };
+
+  const handlePreviousPage = () => {
+    if (currentPage > 1) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < pagesArray.length) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   return (
     <>
@@ -321,272 +198,25 @@ export default function RecipesList() {
 
       />
 
-      {/* Add Recipe Model   */}
-      <Modal show={modelState == "Add-model"} onHide={handleClose}>
-
-        <Modal.Body>
-          <h4 className='text-center'>Add new recipe</h4>
-          <form onSubmit={handleSubmit(onSubmit)} >
-            <div className='form-group my-3 ' >
-              <input type="text" className="form-control text-muted"
-                placeholder='Recipe Name '
-                {...register("name",
-                  {
-                    required: true
-                  })}
-              />
-              {errors.name && errors.name.type === "required"
-                && (<span className='text-danger my-3'>Filed is required</span>)}
-            </div>
-
-
-            <div className='form-group my-3 ' >
-              <input type="number" className="form-control "
-                placeholder='Price '
-                {...register("price",
-                  {
-                    required: "Price is required",
-                    valueAsNumber: true,
-                    pattern: {
-                      value: /^\d+(\.\d{2})?$/,
-                      message: "Enter correct price"
-
-                    }
-                  })}
-              />
-              {errors.price &&
-                (<span className='text-danger my-3'>{errors.price.message}</span>)}
-            </div>
-
-            <div className="form-group my-2 ">
-              <select className="form-select"
-                //  onChange={handleSelect} 
-                //  id="tags"
-                {...register('tagId', {
-                  required: true,
-                  valueAsNumber: true,
-                }
-                )}>
-
-                <option >Select a Tag Id</option>
-                {tagsList.map((tag) => (
-                  <option key={tag.id} value={tag.id}> {tag.name}</option>
-                ))}
-
-              </select>
-              {errors.tagId && errors.tagId.type === "required" &&
-                (<span className='text-danger my-2 '>Please Selsct an option</span>)}
-            </div>
-
-            <div className="form-group my-4">
-              <select className="form-select"
-                id="catgories"
-                {...register('categoriesIds',
-                  {
-                    // valueAsNumber: true,
-                  }
-                )}>
-                <option >Select a Cargory Id</option>
-                {categoriesList.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group my-3 ">
-              <input className="form-control"
-                type="file"
-                placeholder='choose file'
-                accept='image/*'
-                {...register("recipeImage",
-
-                )} />
-
-              {/* {errors.recipeImage && <span>{errors.recipeImage.message}</span>} */}
-            </div>
-            <div className='form-group my-3 ' >
-              <textarea type="text" className="form-control" placeholder="Leave a comment here " rows={4}
-                {...register("description",
-                  {
-                    required: "Description is required"
-                  })}
-
-              ></textarea>
-              {errors.description &&
-                (<span className='text-danger my-3'>{errors.description.message}</span>)}
-            </div>
-            {/* -------------------------------------- */}
-
-
-
-            {/* 
-            <div className='form-group my-3 '>
-              <select id="tag" value={selectedTag} onChange={handleTagChange}>
-                <option value="">Select a Tag</option>
-                {tags.map(tag => (
-                  <option key={recipe.tag.id} value={recipe.tag.name}>{recipe.tag.name}</option>
-                ))}
-              </select>
-            </div>
- */}
-
-
-
-
-            {/* -------------------------------------------- */}
-
-            <div className="form-group">
-              <button className='btn btn-success w-100'>Add Recipes</button>
-            </div>
-          </form>
-
-
-        </Modal.Body>
-
-      </Modal>
-
-
       {/* Delete Recipe Model   */}
-      <Modal show={modelState == "delete-model"} onHide={handleClose}>
+      <Modal show={modelState === "view-model"} onHide={handleClose}>
 
         <Modal.Body>
+          <h4 className=' text-success'> Recipe Details </h4>
           <div className='text-center'>
-            <img src={noData} alt="" />
-            <h5 className='my-3'>Delete This Recipe ?</h5>
-            <span className='text-muted'>are you sure you want to delete this item ? if you are sure just click on delete it</span>
-            <div className='text-end my-3'>
-              <button onClick={deleteRecipes} className='btn btn-outline-danger'>Delete this item</button>
+            {recipeDetails?.imagePath ?
+              <img
+                className=' img-fluid'
+                src={`https://upskilling-egypt.com/` + recipeDetails?.imagePath} alt="" /> :
+              <img className='img-fluid' src={noData} />
+            }
+            <p>Description:{recipeDetails?.description}</p>
+            <p>Category:{recipeDetails?.category?.[0]?.name}</p>
+            {/* <p>Category:{(recipeDetails || {}).category[0] || 'N/A'}</p> */}
+            <p>Tag:{recipeDetails?.tag?.name}</p>
 
-            </div>
+            <button onClick={addToFavorit} className='btn btn-outline-success '>Add to favorit</button>
           </div>
-
-
-        </Modal.Body>
-
-      </Modal>
-
-      {/* Update Recipe Model   */}
-      <Modal show={modelState == "update-model"} onHide={handleClose}>
-
-        <Modal.Body>
-          <h4 className='text-center'>Update recipe</h4>
-          <form onSubmit={handleSubmit(updateRecipe)} >
-            <div className='form-group my-3 ' >
-              <input type="text" className="form-control text-muted"
-                placeholder='Recipe Name '
-                {...register("name",
-                  {
-                    required: true
-                  })}
-              />
-              {errors.name && errors.name.type === "required"
-                && (<span className='text-danger my-3'>Filed is required</span>)}
-            </div>
-
-
-            <div className='form-group my-3 ' >
-              <input type="number" className="form-control "
-                placeholder='Price '
-                {...register("price",
-                  {
-                    required: "Price is required",
-                    valueAsNumber: true,
-                    pattern: {
-                      value: /^\d+(\.\d{2})?$/,
-                      message: "Enter correct price"
-
-                    }
-                  })}
-              />
-              {errors.price &&
-                (<span className='text-danger my-3'>{errors.price.message}</span>)}
-            </div>
-
-            <div className="form-group my-2 ">
-              <select className="form-select"
-                //  onChange={handleSelect} 
-                //  id="tags"
-                {...register('tagId', {
-                  required: true,
-                  valueAsNumber: true,
-                }
-                )}>
-
-                <option >Select a Tag Id</option>
-                {tagsList.map((tag) => (
-                  <option key={tag.id} value={tag.id}>{tag.name}</option>
-                ))}
-
-              </select>
-              {errors.tagId && errors.tagId.type === "required" &&
-                (<span className='text-danger my-2 '>Please Selsct an option</span>)}
-            </div>
-
-            <div className="form-group my-4">
-              <select className="form-select"
-                id="catgories"
-                {...register('categoriesIds',
-                  {
-                    // valueAsNumber: true,
-                  }
-                )}>
-                <option >Select a Cargory Id</option>
-                {categoriesList?.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}</option>
-                ))}
-              </select>
-            </div>
-            <div className="form-group my-3 ">
-              <input className="form-control"
-                type="file"
-                placeholder='choose file'
-                accept='image/*'
-                {...register("recipeImage",
-
-                )} />
-              <img className='w-100'
-                src={`https://upskilling-egypt.com:443/` +
-                  recipe?.imagePath} alt="" />
-
-              {/* {errors.recipeImage && <span>{errors.recipeImage.message}</span>} */}
-            </div>
-            <div className='form-group my-3 ' >
-              <textarea type="text" className="form-control" placeholder="Leave a comment here " rows={4}
-                {...register("description",
-                  {
-                    required: "Description is required"
-                  })}
-
-              ></textarea>
-              {errors.description &&
-                (<span className='text-danger my-3'>{errors.description.message}</span>)}
-            </div>
-            {/* -------------------------------------- */}
-
-
-
-            {/* 
-    <div className='form-group my-3 '>
-      <select id="tag" value={selectedTag} onChange={handleTagChange}>
-        <option value="">Select a Tag</option>
-        {tags.map(tag => (
-          <option key={recipe.tag.id} value={recipe.tag.name}>{recipe.tag.name}</option>
-        ))}
-      </select>
-    </div>
-*/}
-
-
-
-
-            {/* -------------------------------------------- */}
-
-            <div className="form-group">
-              <button className='btn btn-success w-100'>Update Recipes</button>
-            </div>
-          </form>
-
 
         </Modal.Body>
 
@@ -601,11 +231,6 @@ export default function RecipesList() {
           </div>
         </div>
 
-        <div className='col-md-6 '>
-          <div className='text-end'>
-            <button onClick={showAddModel} className=' btn btn-success'>Add New Recipe</button>
-          </div>
-        </div>
 
         <div>
           <div className="row my-2 ">
@@ -623,7 +248,7 @@ export default function RecipesList() {
               <select
                 onChange={getTagValue} className="form-select">
                 <option >Select a Tag Id</option>
-                {tagsList.map((tag) => (
+                {tagsList?.map((tag) => (
                   <option key={tag.id} value={tag.id}> {tag.name}</option>
                 ))}
 
@@ -642,7 +267,7 @@ export default function RecipesList() {
             </div>
           </div>
 
-          {recipesList.length > 0 ?
+          {recipesList?.length > 0 ?
             <div>
               <table className="table table-striped">
                 <thead className=' table-success'>
@@ -659,7 +284,7 @@ export default function RecipesList() {
                   </tr>
                 </thead>
                 <tbody>
-                  {recipesList.map((recipe, index) => (
+                  {recipesList?.map((recipe, index) => (
 
                     <tr key={recipe.id}>
                       <th scope="row">{index + 1}</th>
@@ -671,29 +296,27 @@ export default function RecipesList() {
                             src={
                               `https://upskilling-egypt.com:443/` +
                               recipe.imagePath} alt="" /> */}
-                          {recipe.imagePath ?
-                           <img
-                          className=' img-fluid'
-                          src={
-                            `https://upskilling-egypt.com:443/` +
-                            recipe.imagePath} alt="" /> : (
-                          <img className='img-fluid'src={noData} />
-                        )}
+                          {recipe?.imagePath ?
+                            <img
+                              className=' img-fluid'
+                              src={
+                                `https://upskilling-egypt.com/` +
+                                recipe?.imagePath} alt="" /> : (
+                              <img className='img-fluid' src={noData} />
+                            )}
                         </div>
                       </td>
-                      <td >{recipe.description}</td>
-                      <td >{recipe.price}</td>
+                      <td >{recipe?.description}</td>
+                      <td >{recipe?.price}</td>
                       <td >{recipe?.category[0]?.name}</td>
 
                       <td >
-                        {recipe.tag.name}
+                        {recipe?.tag?.name}
 
                       </td>
                       <td >
-                        <i onClick={() => showUpdateModel(recipe)}
-                          className="fa-solid fa-pen-to-square mx-2 text-warning"></i>
-                        <i onClick={() => showDeletModel(recipe.id)}
-                          className="fa-solid fa-trash text-danger"></i>
+                        <i onClick={() => showViewModel(recipe.id)}
+                          className="fa-solid fa-eye text-success"></i>
                       </td>
                     </tr>
 
@@ -701,11 +324,11 @@ export default function RecipesList() {
                 </tbody>
               </table>
 
-
-              <nav aria-label="...">
+              {/* old pagination */}
+              {/* <nav aria-label="...">
                 <ul className="pagination justify-content-center pagination-sm">
                   {pagesArray.map((pageNo) => (
-                    <li key={pageNo} onClick={() => getAllRecipes(pageNo, searchString)} className="page-item">
+                    <li key={pageNo} onClick={() => handlePageChange(pageNo, searchString)} className="page-item">
                       <a className="page-link">
                         {pageNo}
                       </a>
@@ -715,8 +338,30 @@ export default function RecipesList() {
 
                 </ul>
 
-              </nav>
+              </nav> */}
 
+              <div className='text-center'>
+                <button onClick={handlePreviousPage}
+                  className='prev'
+
+                >&laquo;</button>
+                {visiblePages.map((pageNo) => (
+                  <button key={pageNo} onClick={() => handlePageChange(pageNo, searchString)}
+                    style={{
+                      backgroundColor: currentPage === pageNo ? '#009247' : 'white',
+                      color: currentPage === pageNo ? 'white' : '#009247',
+                      border: '1px solid #009247',
+                      marginLeft: '5px',
+                      borderRadius:'5px'
+                    }} >
+                    {pageNo}
+                  </button>
+                ))}
+                <button onClick={handleNextPage}
+                  className='next'>&raquo;</button>
+
+
+              </div>
             </div>
             :
 

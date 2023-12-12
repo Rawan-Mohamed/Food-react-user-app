@@ -5,11 +5,13 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { ToastContainer, toast } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import { useContext } from 'react';
+import { AuthContext } from '../../../Context/AuthContext';
 
 
 export default function ChangePass({ handleClose }) {
   const navigate = useNavigate();
-  // some {properties} and receive return from hook useForm 
+  // some {properties} and receive return from hook useForm
 
   const {
     register,
@@ -17,16 +19,13 @@ export default function ChangePass({ handleClose }) {
     formState: { errors },
     getValues,
   } = useForm();
-
-  // bdal mn handlha gwa el handleSubmit h3ml function a st2bl feha 
+  const { requestHeaders, baseUrl } = useContext(AuthContext)
+  // bdal mn handlha gwa el handleSubmit h3ml function a st2bl feha
   const onSubmit = (data) => {
     // console.log(data);
     axios
-      .put("https://upskilling-egypt.com:443/api/v1/Users/ChangePassword", data, {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem("adminToken")}`
-
-        },
+      .put(`${baseUrl}/Users/ChangePassword`, data, {
+        headers: requestHeaders,
       }
       )
       .then((response) => {
@@ -78,56 +77,55 @@ export default function ChangePass({ handleClose }) {
               <p>Enter your details below</p>
 
               {/* // old Password */}
-              <div className="form-group my-3 position-relative">
-              <i className="icons fa-solid fa-lock position-absolute text-success" />
+              <div className="form-group my-3 input-icons position-relative">
+                <i className="icons fa-solid fa-lock position-absolute text-success" />
                 <input
                   placeholder='Old Password'
-                  className='form-control ps-4 mb-1'
+                  className='form-control '
                   type="password"
                   {...register("oldPassword", {
                     required: "This field is required",
-                    
+
                   })}
                 />
-                {errors.oldPassword &&  (
+                {errors.oldPassword && (
                   <span className='text-danger'>{errors.oldPassword.message}</span>)}
               </div>
               {/* //New Password */}
-              <div className="form-group my-3 position-relative">
-              <i className="icons fa-solid fa-lock position-absolute text-success" />
+              <div className="form-group my-3 input-icons position-relative">
+                <i className="icons fa-solid fa-lock position-absolute text-success" />
                 <input
                   placeholder='New Password'
-                  className='form-control ps-4 mb-1'
+                  className='form-control '
                   type="password"
                   {...register("newPassword", {
                     required: "This field is required",
-                    pattern:{
-                      value:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-                      message: "Invaild password" ,
+                    pattern: {
+                      value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                      message: "Invaild password",
                     }
                     // required: true,
                     // pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
                   })}
                 />
-                {/* {errors.newPassword && errors.newPassword.type === "required" && (
-                  <span className='text-danger'>newPassword is required</span>)} */}
+
                 {errors.newPassword && (
                   <span className='text-danger'>{errors?.newPassword?.message}</span>)}
               </div>
               {/* //Confirm Password */}
-              <div className="form-group my-3 position-relative">
-              <i className="icons fa-solid fa-lock position-absolute text-success" />
+              <div className="form-group my-3 input-icons position-relative">
+                <i className="icons fa-solid fa-lock position-absolute text-success" />
                 <input
                   placeholder='Confirm New Password'
-                  className='form-control ps-4 mb-1'
+                  className='form-control '
                   type="password"
                   {...register("confirmNewPassword", {
                     validate: (value) =>
                       getValues("newPassword") === value || "Password don't match",
                     // required: true,
-                    pattern:{
-                      value:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-                      message: "Invaild password" ,
+                    pattern: {
+                      value: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
+                      message: "Invaild password",
                     }
 
                   })}

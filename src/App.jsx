@@ -1,59 +1,40 @@
-import { useEffect, useState } from 'react'
-import './App.css'
-import Login from './AuthModule/Components/Login/Login';
-import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import ProtectedRoute from './SharedModule/Components/ProtectedRoute/ProtectedRoute';
-import MasterLayout from './SharedModule/Components/MasterLayout/MasterLayout';
-import UserList from './UsersModule/Components/UserList/UserList';
-import RecipesList from './RecipesModule/Components/RecipesList/RecipesList';
-import CategoriesList from './CategoriesModule/Components/CategoriesList/CategoriesList';
-import AuthLayout from './SharedModule/Components/AuthLayout/AuthLayout';
+import { useContext } from 'react';
+import { RouterProvider, createBrowserRouter } from 'react-router-dom';
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
+import './App.css';
 import ChangePass from './AuthModule/Components/ChangePass/ChangePass';
-import Home from './HomeModule/Components/Home/Home';
-import NotFound from './SharedModule/Components/NotFound/NotFound';
-import { jwtDecode } from 'jwt-decode';
+import Login from './AuthModule/Components/Login/Login';
 import ResetPass from './AuthModule/Components/ResetPass/ResetPass';
 import ResetPassRequest from './AuthModule/Components/ResetPassRequest/ResetPassRequest';
-import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import { AuthContext } from './Context/AuthContext';
+import Home from './HomeModule/Components/Home/Home';
+import FavoritesList from './RecipesModule/Components/RecipesList/FavoritesList';
+import RecipesList from './RecipesModule/Components/RecipesList/RecipesList';
+import AuthLayout from './SharedModule/Components/AuthLayout/AuthLayout';
+import MasterLayout from './SharedModule/Components/MasterLayout/MasterLayout';
+import NotFound from './SharedModule/Components/NotFound/NotFound';
+import ProtectedRoute from './SharedModule/Components/ProtectedRoute/ProtectedRoute';
+import Registeration from './AuthModule/Components/Registeration/Registeration';
 
 
 
 function App() {
-  const [adminData, setAdminData] = useState(null); //useState 34an 3ndi data 3yza atklm m3ha so use "useState"
-
-
-  let saveAdminData = () => {
-    let encodedToken = localStorage.getItem("adminToken");
-    // let decodedToken = jwtDecode(encodedToken);
-    // setAdminData(decodedToken);
-    
-    if (encodedToken) {
-      let decodedToken = jwtDecode(encodedToken);
-      setAdminData(decodedToken);
-      console.log(setAdminData)
-    }
-  }
-  useEffect(() => {
-    if (localStorage.getItem("adminToken")) {
-      saveAdminData();
-    }
-  }, []);
-
+let {userData,saveUserData} = useContext(AuthContext)
   const routes = createBrowserRouter([
     {
       path: 'dashboard',
       element: (
-        <ProtectedRoute adminData={adminData}>
-          <MasterLayout adminData={adminData} />
+        <ProtectedRoute userData={userData}>
+          <MasterLayout userData={userData} />
         </ProtectedRoute>
       ),
       errorElement: <NotFound />,
       children: [
         { index: true, element: <Home /> },
-        { path: "users", element: <UserList /> },
         { path: "recipes", element: <RecipesList /> },
-        { path: "categories", element: <CategoriesList /> },
+        { path: "favourites", element: <FavoritesList /> },
+        
        
       ]
     },
@@ -65,11 +46,12 @@ function App() {
       ,
       errorElement: <NotFound />,
       children: [
-        { index: true, element: <Login saveAdminData={saveAdminData} /> },
-        { path: "login", element: <Login saveAdminData={saveAdminData} /> },
+        { index: true, element: <Login saveUserData={saveUserData} /> },
+        { path: "login", element: <Login saveUserData={saveUserData} /> },
         { path: "change-password", element: <ChangePass /> },
         { path: "reset-pass", element: <ResetPass /> },
         { path: "reset-pass-request", element: <ResetPassRequest /> },
+        { path: "registeration", element: <Registeration/> },
         
  
 

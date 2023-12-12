@@ -35,7 +35,7 @@
 //     axios
 //       .put("http://upskilling-egypt.com:3002/api/v1/Users/ChangePassword", data, {
 //         headers: {
-//           Authorization: `Bearer ${localStorage.getItem("adminToken")}`
+//           Authorization: `Bearer ${localStorage.getItem("userToken")}`
 
 //         },
 //       }
@@ -129,3 +129,78 @@
 //     </div>
 //   )
 // }
+
+
+// {provider && profile ? (
+//     <User provider={provider} profile={profile} onLogout={onLogoutSuccess} />
+//   ) : (
+//     <div className={`App ${provider && profile ? 'hide' : ''}`}>
+//       <h1 className='title'>ReactJS Social Login</h1>
+//       <LoginSocialFacebook
+//         isOnlyGetToken
+//         appId={process.env.REACT_APP_FB_APP_ID || ''}
+//         onLoginStart={onLoginStart}
+//         onResolve={({ provider, data }) => {
+//           setProvider(provider)
+//           setProfile(data)
+//         }}
+//         onReject={(err) => {
+//           console.log(err)
+//         }}
+//       >
+//         <FacebookLoginButton />
+//       </LoginSocialFacebook>
+
+//       <LoginSocialGoogle
+//         isOnlyGetToken
+//         client_id={process.env.REACT_APP_GG_APP_ID || ''}
+//         onLoginStart={onLoginStart}
+//         onResolve={({ provider, data }) => {
+//           setProvider(provider)
+//           setProfile(data)
+//         }}
+//         onReject={(err) => {
+//           console.log(err)
+//         }}
+//       >
+//         <GoogleLoginButton />
+//       </LoginSocialGoogle>
+
+
+//       <LoginSocialLinkedin
+//         isOnlyGetToken
+//         client_id={process.env.REACT_APP_LINKEDIN_APP_ID || ''}
+//         client_secret={process.env.REACT_APP_LINKEDIN_APP_SECRET || ''}
+//         redirect_uri={REDIRECT_URI}
+//         onLoginStart={onLoginStart}
+//         onResolve={({ provider, data }) => {
+//           setProvider(provider)
+//           setProfile(data)
+//         }}
+//         onReject={(err) => {
+//           console.log(err)
+//         }}
+//       >
+//         <LinkedInLoginButton />
+//       </LoginSocialLinkedin>
+
+//       <LoginSocialGithub
+//         isOnlyGetToken
+//         client_id={process.env.REACT_APP_GITHUB_APP_ID || ''}
+//         client_secret={process.env.REACT_APP_GITHUB_APP_SECRET || ''}
+//         redirect_uri={REDIRECT_URI}
+//         onLoginStart={onLoginStart}
+//         onResolve={({ provider, data }) => {
+//           setProvider(provider)
+//           setProfile(data)
+//         }}
+//         onReject={(err) => {
+//           console.log(err)
+//         }}
+//       >
+//         <GithubLoginButton />
+//       </LoginSocialGithub>
+
+ 
+//     </div>
+//   )}

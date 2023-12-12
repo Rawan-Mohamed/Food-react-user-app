@@ -6,6 +6,8 @@ import 'react-toastify/dist/ReactToastify.css';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { useState } from 'react';
+import { useContext } from 'react';
+import { AuthContext } from '../../../Context/AuthContext';
 
 export default function ResetPassRequest() {
   const navigate = useNavigate();
@@ -16,12 +18,12 @@ export default function ResetPassRequest() {
     formState: { errors },
   } = useForm();
   const [isLoading, setIsLoading] = useState(false);
-
+  const { baseUrl } = useContext(AuthContext);
   const onSubmit = (data) => {
     // console.log(data);
     setIsLoading(true);
     axios
-      .post("https://upskilling-egypt.com:443/api/v1/Users/Reset/Request", data)
+      .post(`${baseUrl}/Users/Reset/Request`, data)
       .then((response) => {
         navigate("/reset-pass");
 
