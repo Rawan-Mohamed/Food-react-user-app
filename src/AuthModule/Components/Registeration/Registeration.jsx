@@ -13,6 +13,7 @@ import VerfcationCode from '../VerfcationCode/VerfcationCode';
 import { LoginSocialGoogle, LoginSocialFacebook, LoginSocialGithub, LoginSocialLinkedin, } from 'reactjs-social-login';
 import { FacebookLoginButton, GoogleLoginButton, GithubLoginButton, LinkedInLoginButton, } from 'react-social-login-buttons'
 import { GoogleAuthProvider, FacebookAuthProvider } from 'firebase/auth';
+import User from '../User/User';
 // import { auth } from '../firebase';
 export default function Registeration() {
     const REDIRECT_URI = window.location.href;
