@@ -10,29 +10,31 @@ import { AuthContext } from '../../../Context/AuthContext';
 import { ToastContext } from '../../../Context/ToastContext';
 import Modal from 'react-bootstrap/Modal';
 import VerfcationCode from '../VerfcationCode/VerfcationCode';
-import { LoginSocialGoogle, LoginSocialFacebook, LoginSocialGithub, LoginSocialLinkedin, } from 'reactjs-social-login';
-import { FacebookLoginButton, GoogleLoginButton, GithubLoginButton, LinkedInLoginButton, } from 'react-social-login-buttons'
-import { GoogleAuthProvider, FacebookAuthProvider } from 'firebase/auth';
+import { LoginSocialGoogle, LoginSocialFacebook } from 'reactjs-social-login';
+import { FacebookLoginButton, GoogleLoginButton } from 'react-social-login-buttons'
 import User from '../User/User';
+import { useHistory } from 'react-router-dom'; // Import useHistory from react-router-dom
+
 // import { auth } from '../firebase';
 export default function Registeration() {
-    const REDIRECT_URI = window.location.href;
+    const REDIRECT_URI = 'http:localhost';
+    const history = useHistory();
     const [provider, setProvider] = useState('')
     const [profile, setProfile] = useState(null)
 
-    const onLoginStart = useCallback(() => {
-        alert('login start')
-    }, [])
+    // const onLoginStart = useCallback(() => {
+    //     alert('login start')
+    // }, [])
 
-    const onLogoutSuccess = useCallback(() => {
-        setProfile(null)
-        setProvider('')
-        alert('logout success')
-    }, [])
+    // const onLogoutSuccess = useCallback(() => {
+    //     setProfile(null)
+    //     setProvider('')
+    //     alert('logout success')
+    // }, [])
 
 
 
-    const navigate = useNavigate();
+    // const navigate = useNavigate();
     const {
         register,
         handleSubmit,
@@ -40,7 +42,7 @@ export default function Registeration() {
         getValues,
     } = useForm();
 
-
+    history.push('/dashboard');
     const { baseUrl } = useContext(AuthContext);
     const { getToastValue } = useContext(ToastContext)
 
@@ -244,24 +246,20 @@ export default function Registeration() {
 
 
                                 {/* ------------------------ social media */}
-
-                                {provider && profile ? (
-                                    <User provider={provider} profile={profile} onLogout={onLogoutSuccess} />
-                                ) : (
-                                    <div className={`App ${provider && profile ? 'hide' : ''}`}>
-                                        <p className='title text-center line'>or Login with</p>
-                                        <div className='row'>
+                                <div>
+                                    {!profile ? (
+                                            <div className='row'>
+                                                <p className='title text-center line'>or Login with</p>
                                             <LoginSocialFacebook
                                                 className='col-md-6'
                                                 isOnlyGetToken
                                                 appId={197550470089607 || ''}
-                                                onLoginStart={onLoginStart}
-                                                onResolve={({ provider, data }) => {
-                                                    setProvider(provider)
-                                                    setProfile(data)
+                                                onResolve={(response) => {
+                                                    console.log(response);
+                                                    setProfile(response.data)
                                                 }}
-                                                onReject={(err) => {
-                                                    console.log(err)
+                                                onReject={(error) => {
+                                                    console.log(error)
                                                 }}
                                             >
                                                 <FacebookLoginButton className='facbook-button' />
@@ -273,14 +271,13 @@ export default function Registeration() {
                                             <LoginSocialGoogle
                                                 isOnlyGetToken
                                                 className='col-md-6 '
-                                                client_id={"452584017564-6reo3ac4nberg23pafaqo7re6rs3ro3t.apps.googleusercontent.com" || ''}
-                                                onLoginStart={onLoginStart}
-                                                onResolve={({ provider, data }) => {
-                                                    setProvider(provider)
-                                                    setProfile(data)
+                                                client_id={"801611910502-al5r7ssavjtdcq54jolka8evvdt528rk.apps.googleusercontent.com" || ''}
+                                                // redirectUri={REDIRECT_URI}
+                                                onResolve={(response) => {
+                                                    setProfile(response.data)
                                                 }}
-                                                onReject={(err) => {
-                                                    console.log(err)
+                                                onReject={(error) => {
+                                                    console.log(error)
                                                 }}
                                             >
                                                 <GoogleLoginButton />
@@ -288,51 +285,9 @@ export default function Registeration() {
 
                                         </div>
 
-                                        {/*
-                                        <LoginSocialLinkedin
-                                            isOnlyGetToken
-                                            client_id={process.env.REACT_APP_LINKEDIN_APP_ID || ''}
-                                            client_secret={process.env.REACT_APP_LINKEDIN_APP_SECRET || ''}
-                                            redirect_uri={REDIRECT_URI}
-                                            onLoginStart={onLoginStart}
-                                            onResolve={({ provider, data }) => {
-                                                setProvider(provider)
-                                                setProfile(data)
-                                            }}
-                                            onReject={(err) => {
-                                                console.log(err)
-                                            }}
-                                        >
-                                            <LinkedInLoginButton />
-                                        </LoginSocialLinkedin>
 
-                                        <LoginSocialGithub
-                                            isOnlyGetToken
-                                            client_id={process.env.REACT_APP_GITHUB_APP_ID || ''}
-                                            client_secret={process.env.REACT_APP_GITHUB_APP_SECRET || ''}
-                                            redirect_uri={REDIRECT_URI}
-                                            onLoginStart={onLoginStart}
-                                            onResolve={({ provider, data }) => {
-                                                setProvider(provider)
-                                                setProfile(data)
-                                            }}
-                                            onReject={(err) => {
-                                                console.log(err)
-                                            }}
-                                        >
-                                            <GithubLoginButton />
-                                        </LoginSocialGithub> */}
-
-
-                                    </div>
-                                )}
-
-
-
-
-
-
-
+                                    ) : ''}
+                                </div>
                                 {/* ----------------------------------- */}
                             </form>
 
