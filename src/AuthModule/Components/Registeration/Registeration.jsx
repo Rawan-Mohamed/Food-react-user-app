@@ -13,12 +13,10 @@ import VerfcationCode from '../VerfcationCode/VerfcationCode';
 import { LoginSocialGoogle, LoginSocialFacebook } from 'reactjs-social-login';
 import { FacebookLoginButton, GoogleLoginButton } from 'react-social-login-buttons'
 import User from '../User/User';
-import { useHistory } from 'react-router-dom'; // Import useHistory from react-router-dom
 
 // import { auth } from '../firebase';
 export default function Registeration() {
     const REDIRECT_URI = 'http:localhost';
-    const history = useHistory();
     const [provider, setProvider] = useState('')
     const [profile, setProfile] = useState(null)
 
